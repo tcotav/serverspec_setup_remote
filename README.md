@@ -1,4 +1,5 @@
-##Running Tests via ServerSpec
+![Level 11](Level11.png)
+## Serverspec Test Setup For Remote Hosts
 
 
 ### Before you start, you need
@@ -65,53 +66,48 @@ What these lines set up for us is the number of vagrant vms we're going to spin 
 Here's the lame part of this particular test.  We'll need to set the hostnames that we're targeting in our `/etc/hosts` file so that we can hit 'em later using serverspec.
 
 
-## Set up the Tests
+### Set up the Tests
 
 There are two parts to the configuration for each of these hosts
 
-1) .ssh/config file containing entries for each host tested
-2) yml configuration describing tests for each host tested
+  - .ssh/config file containing entries for each host tested
+  - yml configuration describing tests for each host tested
 
-To configure 1), we'll need to know what hosts we're setting up.  The naming convention used for the vagrant files in this doc is "jdemo-test-X" where x is the node number starting from 0.  So for the default vagrant file we've got two nodes so we're working with hosts jdemo-test-0 and jdemo-test-1.  However, here in laptop-land, we don't have working DNS so we're going to use the IP of the boxes instead.  The alternative to this is to add entries to the `/etc/hosts` file.  Your call...  IP is easier, but in more regular usage we would definitely use hostnames.
+To configure the ssh, we'll need to know what hosts we're setting up.  The naming convention used for the vagrant files in this doc is "jdemo-test-X" where x is the node number starting from 0.  So for the default vagrant file we've got two nodes so we're working with hosts jdemo-test-0 and jdemo-test-1.  However, here in laptop-land, we don't have working DNS so we're going to use the IP of the boxes instead.  The alternative to this is to add entries to the `/etc/hosts` file.  Your call...  IP is easier, but in more regular usage we would definitely use hostnames.
 
 
 1)  First off, setting up the ssh config so that we can just magically get on to the hosts.  Edit file `~/.ssh/config` and add the following lines: 
 
-```
-Host 192.168.56.16*
-     User vagrant.
-     IdentityFile ~/.vagrant.d/insecure_private_key
-```
+    Host 192.168.56.16*
+         User vagrant.
+         IdentityFile ~/.vagrant.d/insecure_private_key
 
 In parallel to that, we want to drop entries into the `properties.yml` for each host including the tests that we haven't quite gotten around to writing yet.  
 
-```
-# first vagrant host
-# use hostname if you can here
-#jdemo-test-0:
-192.168.56.160:
-  # tests to run - found in spec/
-  :roles:
-  - ubuntu
-  - jdemo
-  fake-var: 1.1.14
-
-
-# second vagrant host
-#jdemo-test-1:
-192.168.56.161:
-  # tests to run - found in spec/
-  :roles:
-  - ubuntu
-  - jdemo
-  fake-var: 1.1.14
-```
+    # first vagrant host
+    # use hostname if you can here
+    #jdemo-test-0:
+    192.168.56.160:
+      # tests to run - found in spec/
+      :roles:
+      - ubuntu
+      - jdemo
+      fake-var: 1.1.14
+    
+    
+    # second vagrant host
+    #jdemo-test-1:
+    192.168.56.161:
+      # tests to run - found in spec/
+      :roles:
+      - ubuntu
+      - jdemo
+      fake-var: 1.1.14
 
 Now its time to define the `ubuntu` and `jdemo` that we reference in our `properties.yml` `roles` section.
 
 
-Adding tests
-============
+### Adding tests
 
 The main script picks up whatever is in the role directories.  The roles from `properties.yml` correspond to the directory names present in the `spec` directory.
 
@@ -132,30 +128,30 @@ Let's create some placeholder files first:
 
 Edit the file `spec/ubuntu/ubuntu_host_spec.rb`
   
-  require 'spec_helper'
-  
-  
-  users=[
-      {'name' => 'vagrant', 'uid' => 900}
-  ]
-  
-  groups=[
-      {'name' => 'vagrant', 'gid' => 900}
-  ]
-  
-  users.each do |user|
-    describe user(user['name']) do
-      it { should exist }
-      it { should have_uid user['uid'] }
+    require 'spec_helper'
+    
+    
+    users=[
+        {'name' => 'vagrant', 'uid' => 900}
+    ]
+    
+    groups=[
+        {'name' => 'vagrant', 'gid' => 900}
+    ]
+    
+    users.each do |user|
+      describe user(user['name']) do
+        it { should exist }
+        it { should have_uid user['uid'] }
+      end
     end
-  end
-  
-  groups.each do |group|
-    describe group(group['name']) do
-      it { should exist }
-      it { should have_gid group['gid'] }
+    
+    groups.each do |group|
+      describe group(group['name']) do
+        it { should exist }
+        it { should have_gid group['gid'] }
+      end
     end
-  end
 
 
 That looks pretty cool right?  Well, it doesn't do much other than confirm that a `vagrant` user and group have been added and verifies their gid/uid.  The idea for this role and respective set of tests is to verify operating system customizations you expect to be done to the target host.  If you don't have any of these -- don't use this role for the host you're targeting.  Simple as that.
@@ -192,7 +188,12 @@ There's more we can add here later, but let's roll with this for right now.  To 
     Finished in 0.1142 seconds
     7 examples, 0 failures
 
-We passed all of our tests.  Ok, let's see what a failure looks like.  Connect to the second vagrant box and shut down the `tomcat` service.
+We passed all of our tests.  Ok, let's see what a failure looks like.
+  
+
+### Let's Fail Spectacularly
+  
+First, lets set up our failure condition.  Connect to the second vagrant box and shut down the `tomcat` service.
 
     $ vagrant ssh jdemo-test-1
     
@@ -237,4 +238,3 @@ Ok, now lets run our serverspec test again.
     
 Lets all cheer this one time for that failure.  So now you've seen what a failed test looks like.
 
-###
