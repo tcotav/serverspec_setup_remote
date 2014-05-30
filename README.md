@@ -238,3 +238,95 @@ Ok, now lets run our serverspec test again.
     
 Lets all cheer this one time for that failure.  So now you've seen what a failed test looks like.
 
+Okay, now lets go back in to that host and turn tomcat back on so that our tests succeed.  Connect to the vagrant host.
+
+    $ vagrant ssh jdemo-test-1
+
+On that host, turn the service back on:
+
+    vagrant@jdemo-test-1:~$ sudo /etc/init.d/tomcat6 start
+     * Starting Tomcat servlet engine tomcat6                                           [ OK ]
+      
+    vagrant@jdemo-test-1:~$ exit
+
+Okay, now lets write more tests!
+
+### Flushing Out Our Potential Tests
+
+What else should we test?  Well, lets look at our cookbook and see what resources we're working on and what other cookbooks we call.
+
+Cookbook summary
+
+  - update apt packages
+  - install tomcat package
+  - get remote war file
+  - install war file
+  - start service
+ 
+There's one other thing that we can note from looking at the cookbooks -- in the `attributes/default.rb` we specify that we want to use `openjdk` version `7`. 
+
+So we're going to add that to our test.
+
+  - openjdk 7 is installed
+  
+Those are items we found in our cookbooks.  Let's translate them into something we can use -- serverspec items.  
+
+### Into Serverspec
+
+The first thing we need to test is where does this fit into the role directories that we've set up.  We've got two directories:
+ 
+ - jdemo
+ - ubuntu
+
+This maps to an OS cookbook and an app cookbook which is a pretty good pattern to follow.
+
+Pretty clearly the bulk of the list falls into jdemo.  The only exception is the status of apt which we'll deal with separately.  Inside jdemo there is just one spec file.  Serverspec will tick through all the files in a subdirectory so you can either dump everything into one big file or break it out into a bunch of files.  Whatever method suits your madness.
+
+For this, we'll put it all into `jdemo_spec.rb`
+ 
+First off, the `java` install.  The way that we did it was fairly generic command line parse that looked like this:
+
+    # confirm the java install
+    describe command('java -version') do
+      its(:stderr) { should match /java version \"1.7/ }
+      it { should return_exit_status 0 }
+    end
+
+Another way we could do this is to confirm that `apt` installed the package with the following:
+    
+    describe package('openjdk-7-jdk') do
+      it { should be_installed }
+    end
+
+Great right?  Well maybe.  What we just did there was tie the test to ubuntu.  *We crossed the streams.*  Maybe that's fine in our environment.  The (chef resource `package`)[http://docs.opscode.com/resource_package.html] itself allows for a number of different packages types to be handled (windows, solaris, freebsd, ... etc), but most likely the package name won't be `openjdk-7-jdk`.  We could probably work around that if that was what was needed.  Fortunately, we don't need to work around it.
+
+We can do the same thing to test of `tomcat` is installed (with the same limitations).
+
+    describe package('tomcat6') do
+      it { should be_installed }
+    end
+
+We know the service is running by port 8080 being bound so that's checked already.
+
+What about the war file?  Is it in place as the first part?
+
+    describe file('/var/lib/tomcat6/webapps/punter.war') do
+      it { should be_file }
+    end
+
+and then as the second item there -- did the war get opened up and used:
+
+    describe file('/var/lib/tomcat6/webapps/punter') do
+      it { should be_directory }
+    end
+    
+Wow -- look at us go!  Give it a test using the `rake` command and hopefully it all works out.
+
+You should see this twice in the serverspec output:
+
+    11 examples, 0 failures
+    
+### 
+
+Created by James Francis - <a href="https://twitter.com/tcotav" class="twitter-follow-button" data-show-count="false">Follow @tcotav</a>
+                           <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
