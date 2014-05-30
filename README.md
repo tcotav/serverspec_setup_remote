@@ -4,19 +4,19 @@
 
 ### Intro
 
-(Serverspec)[http://serverspec.org] is a great way to check if your servers are configured as you expect.  From the website, "serverspec tests your servers' actual state through ssh access".  Of the current scripting packages, I'm a huge fan of serverspec because I can use the same tests in development all the way out through production.  A prod box isn't working right?  We've automated here a way to make sure that it is in the state we expect for our app.  Below I lay out a basic flexible framework for using `serverspec` with a variety of nodes and applications.
+[Serverspec](http://serverspec.org) is a great way to check if your servers are configured as you expect.  From the website, "serverspec tests your servers' actual state through ssh access".  Of the current scripting packages, I'm a huge fan of serverspec because I can use the same tests in development all the way out through production.  A prod box isn't working right?  We've automated here a way to make sure that it is in the state we expect for our app.  Below I lay out a basic flexible framework for using `serverspec` with a variety of nodes and applications.
 
 ### Before you start, you need
 
   - a development chef server (hosted chef or otherwise)
   - a chef workstation 
   - vagrant (http://vagrantup.com)
-  - serverspec (installed)[http://serverspec.org/]
+  - serverspec [installed](http://serverspec.org/)
 
  
 ### Set up Test Cookbook - jdemo
 
-We're going to write a set of tests to run against a pair of "external" ubuntu virtual machines running our (jdemo tomcat application)[https://github.com/tcotav/cookbook-jdemo].  You'll note that the jdemo repo includes serverspec tests.  Those run against a virtualized local host.  With this doc, we want to show how you can use serverspec to verify any number of remote machines.
+We're going to write a set of tests to run against a pair of "external" ubuntu virtual machines running our [jdemo tomcat application](https://github.com/tcotav/cookbook-jdemo).  You'll note that the jdemo repo includes serverspec tests.  Those run against a virtualized local host.  With this doc, we want to show how you can use serverspec to verify any number of remote machines.
 
 First up, lets make sure you've got the `jdemo` cookbook installed in your chef server.  A `Berksfile` is provided with this repo that will install the cookbook for you.
 
@@ -302,7 +302,7 @@ Another way we could do this is to confirm that `apt` installed the package with
       it { should be_installed }
     end
 
-Great right?  Well maybe.  What we just did there was tie the test to ubuntu.  *We crossed the streams.*  Maybe that's fine in our environment.  The (chef resource `package`)[http://docs.opscode.com/resource_package.html] itself allows for a number of different packages types to be handled (windows, solaris, freebsd, ... etc), but most likely the package name won't be `openjdk-7-jdk`.  We could probably work around that if that was what was needed.  Fortunately, we don't need to work around it.
+Great right?  Well maybe.  What we just did there was tie the test to ubuntu.  *We crossed the streams.*  Maybe that's fine in our environment.  The [chef resource `package`](http://docs.opscode.com/resource_package.html) itself allows for a number of different packages types to be handled (windows, solaris, freebsd, ... etc), but most likely the package name won't be `openjdk-7-jdk`.  We could probably work around that if that was what was needed.  Fortunately, we don't need to work around it.
 
 We can do the same thing to test of `tomcat` is installed (with the same limitations).
 
@@ -331,6 +331,3 @@ You should see this twice in the serverspec output:
     11 examples, 0 failures
     
 ### 
-
-Created by James Francis - <a href="https://twitter.com/tcotav" class="twitter-follow-button" data-show-count="false">Follow @tcotav</a>
-                           <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
