@@ -1,4 +1,3 @@
-![Level 11](Level11.png)
 ## Serverspec Test Setup For Remote Hosts
 
 
@@ -330,4 +329,3 @@ You should see this twice in the serverspec output:
 
     11 examples, 0 failures
     
-### 
