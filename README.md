@@ -2,6 +2,10 @@
 ## Serverspec Test Setup For Remote Hosts
 
 
+### Intro
+
+(Serverspec)[http://serverspec.org] is a great way to check if your servers are configured as you expect.  From the website, "serverspec tests your servers' actual state through ssh access".  Of the current scripting packages, I'm a huge fan of serverspec because I can use the same tests in development all the way out through production.  A prod box isn't working right?  We've automated here a way to make sure that it is in the state we expect for our app.  Below I lay out a basic flexible framework for using `serverspec` with a variety of nodes and applications.
+
 ### Before you start, you need
 
   - a development chef server (hosted chef or otherwise)
