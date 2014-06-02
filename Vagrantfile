@@ -6,7 +6,7 @@
 #
 org_name=ENV['CHEF_ORG']
 
-chef_validation_key_path = "/Users/james/.chef/#{org_name}-validator.pem"
+chef_validation_key_path = "#{ENV['HOME']}/.chef/#{org_name}-validator.pem"
 #
 # END
 ########################################################
