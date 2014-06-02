@@ -28,7 +28,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   (0..(number_of_nodes-1)).each do |node_num|
     config.vm.define "jdemo-test-#{node_num}"  do |box|
       box.vm.hostname = "jdemo-test-#{node_num}"
-      box.vm.network "public_network"
+      #box.vm.network "public_network"
       box.vm.network "private_network", ip: "192.168.56.16#{node_num}"
 
       box.vm.provision "chef_client" do |chef|
