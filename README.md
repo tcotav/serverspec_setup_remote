@@ -254,7 +254,7 @@ On that host, turn the service back on:
 
 Okay, now lets write more tests!
 
-### Flushing Out Our Potential Tests
+### Fleshing Out Our Potential Tests
 
 What else should we test?  Well, lets look at our cookbook and see what resources we're working on and what other cookbooks we call.
 
